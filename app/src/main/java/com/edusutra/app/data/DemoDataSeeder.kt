@@ -2,6 +2,8 @@
 package com.edusutra.app.data
 
 import com.edusutra.app.data.repository.ProgressRepository
+import com.edusutra.app.data.repository.UserRepository
+import com.edusutra.app.data.local.entity.User
 import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Mastery
 import com.edusutra.app.data.local.entity.Revision
@@ -9,9 +11,27 @@ import kotlinx.coroutines.flow.first
 
 object DemoDataSeeder {
 
-    suspend fun seedIfEmpty(repository: ProgressRepository) {
-
+    suspend fun seedIfEmpty(
+        repository: ProgressRepository,
+        userRepository: UserRepository
+    ) {
         val userId = 1
+
+        // Create a demo user if one does not already exist
+        val existingUser = userRepository.getUserById(userId)
+
+        if (existingUser == null) {
+            userRepository.registerUser(
+                User(
+                    userId = userId,
+                    fullName = "Jeevika Singathia",
+                    email = "demo@edusutra.com",
+                    passwordHash = "demo_password_placeholder",
+                    university = "Mody University",
+                    course = "Computer Science and Engineering"
+                )
+            )
+        }
 
         val existingProgress = repository.getProgress(userId).first()
         val existingMastery = repository.getMastery(userId).first()
