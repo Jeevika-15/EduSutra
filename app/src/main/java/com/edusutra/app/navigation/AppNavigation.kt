@@ -110,7 +110,15 @@ fun AppNavigation(
             ProfileScreen(
                 user = user,
                 onSaveProfile = onSaveProfile,
-                onLogout = onLogout
+                onLogout = {
+                    onLogout()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
