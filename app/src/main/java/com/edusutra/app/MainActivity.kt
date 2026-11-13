@@ -1,4 +1,3 @@
-
 package com.edusutra.app
 
 import android.os.Bundle
@@ -28,18 +27,18 @@ class MainActivity : ComponentActivity() {
         val repository = ProgressRepository(
             database.progressDao(),
             database.masteryDao(),
-            database.revisionDao()
+            database.revisionDao(),
         )
 
         setContent {
             EduSutraTheme {
                 Surface(
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
 
                     val progressViewModel: ProgressViewModel =
                         viewModel(
-                            factory = ProgressViewModelFactory(repository)
+                            factory = ProgressViewModelFactory(repository),
                         )
 
                     LaunchedEffect(Unit) {
@@ -51,9 +50,7 @@ class MainActivity : ComponentActivity() {
 
                     AppNavigation(
                         progressUiState = uiState,
-                        onCompleteRevision = { revisionId ->
-                            progressViewModel.completeRevision(revisionId)
-                        }
+                        onCompleteRevision = progressViewModel::completeRevision,
                     )
                 }
             }

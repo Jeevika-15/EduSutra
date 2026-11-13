@@ -15,7 +15,7 @@ object DatabaseProvider {
             val instance = Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
-                "edusutra_database"
+                "edusutra_database",
             )
                 .build()
 

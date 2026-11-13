@@ -5,11 +5,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.edusutra.app.data.repository.ProgressRepository
 
 class ProgressViewModelFactory(
-    private val repository: ProgressRepository
+    private val repository: ProgressRepository,
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(
-        modelClass: Class<T>
+        modelClass: Class<T>,
     ): T {
 
         if (modelClass.isAssignableFrom(ProgressViewModel::class.java)) {
@@ -18,7 +18,7 @@ class ProgressViewModelFactory(
         }
 
         throw IllegalArgumentException(
-            "Unknown ViewModel class: ${modelClass.name}"
+            "Unknown ViewModel class: ${modelClass.name}",
         )
     }
 }
