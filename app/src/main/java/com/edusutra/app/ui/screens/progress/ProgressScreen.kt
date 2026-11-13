@@ -1,4 +1,3 @@
-
 package com.edusutra.app.ui.screens.progress
 
 import androidx.compose.foundation.background
@@ -122,7 +121,7 @@ fun ProgressScreen(
 
                 StatisticCard(
                     title = "Completed Lessons",
-                    value = totalCompleted.toString(),
+                    value = "$totalCompleted",
                     modifier = Modifier.weight(1f),
                 )
             }

@@ -1,3 +1,4 @@
+
 package com.edusutra.app
 
 import android.os.Bundle
@@ -9,11 +10,23 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+
 import com.edusutra.app.data.DemoDataSeeder
 import com.edusutra.app.data.local.DatabaseProvider
+import com.edusutra.app.data.repository.CourseRepository
+import com.edusutra.app.data.repository.EnrollmentRepository
+import com.edusutra.app.data.repository.LearningPathRepository
 import com.edusutra.app.data.repository.ProgressRepository
+
 import com.edusutra.app.navigation.AppNavigation
 import com.edusutra.app.ui.theme.EduSutraTheme
+
+import com.edusutra.app.viewmodel.CourseCatalogueViewModel
+import com.edusutra.app.viewmodel.CourseCatalogueViewModelFactory
+import com.edusutra.app.viewmodel.CourseDetailsViewModel
+import com.edusutra.app.viewmodel.CourseDetailsViewModelFactory
+import com.edusutra.app.viewmodel.LearningPathViewModel
+import com.edusutra.app.viewmodel.LearningPathViewModelFactory
 import com.edusutra.app.viewmodel.ProgressViewModel
 import com.edusutra.app.viewmodel.ProgressViewModelFactory
 
@@ -22,35 +35,103 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val database = DatabaseProvider.getDatabase(applicationContext)
+        val database =
+            DatabaseProvider.getDatabase(applicationContext)
 
+        // Progress Repository
         val repository = ProgressRepository(
             database.progressDao(),
             database.masteryDao(),
-            database.revisionDao(),
+            database.revisionDao()
         )
+
+        // Courses Repositories
+        val courseRepository =
+            CourseRepository(database.courseDao())
+
+        val enrollmentRepository =
+            EnrollmentRepository(database.enrollmentDao())
+
+        val learningPathRepository =
+            LearningPathRepository(database.learningPathDao())
 
         setContent {
             EduSutraTheme {
                 Surface(
-                    color = MaterialTheme.colorScheme.background,
+                    color = MaterialTheme.colorScheme.background
                 ) {
 
+                    // Progress ViewModel
                     val progressViewModel: ProgressViewModel =
                         viewModel(
-                            factory = ProgressViewModelFactory(repository),
+                            factory = ProgressViewModelFactory(repository)
                         )
 
+                    // Course Catalogue ViewModel
+                    val courseCatalogueViewModel: CourseCatalogueViewModel =
+                        viewModel(
+                            factory = CourseCatalogueViewModelFactory(
+                                courseRepository
+                            )
+                        )
+
+                    // Course Details ViewModel
+                    val courseDetailsViewModel: CourseDetailsViewModel =
+                        viewModel(
+                            factory = CourseDetailsViewModelFactory(
+                                courseRepository,
+                                enrollmentRepository
+                            )
+                        )
+
+                    // Learning Path ViewModel
+                    val learningPathViewModel: LearningPathViewModel =
+                        viewModel(
+                            factory = LearningPathViewModelFactory(
+                                learningPathRepository
+                            )
+                        )
+
+                    // Seed sample data
                     LaunchedEffect(Unit) {
+
                         DemoDataSeeder.seedIfEmpty(repository)
-                        progressViewModel.loadProgress(userId = 1)
+
+                        DemoDataSeeder.seedCoursesIfEmpty(
+                            courseRepository
+                        )
+
+                        DemoDataSeeder.seedLearningPathIfEmpty(
+                            courseRepository,
+                            learningPathRepository
+                        )
+
+                        progressViewModel.loadProgress(
+                            userId = 1
+                        )
                     }
 
-                    val uiState by progressViewModel.uiState.collectAsState()
+                    val uiState by
+                    progressViewModel.uiState.collectAsState()
 
+                    // App Navigation
                     AppNavigation(
                         progressUiState = uiState,
-                        onCompleteRevision = progressViewModel::completeRevision,
+
+                        onCompleteRevision = { revisionId ->
+                            progressViewModel.completeRevision(
+                                revisionId
+                            )
+                        },
+
+                        courseCatalogueViewModel =
+                            courseCatalogueViewModel,
+
+                        courseDetailsViewModel =
+                            courseDetailsViewModel,
+
+                        learningPathViewModel =
+                            learningPathViewModel
                     )
                 }
             }

@@ -8,17 +8,23 @@ import com.edusutra.app.data.local.entity.User
 import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Mastery
 import com.edusutra.app.data.local.entity.Revision
-import com.edusutra.app.data.local.entity.DiagnosticQuestion
-import com.edusutra.app.data.local.entity.QuizQuestion
-import com.edusutra.app.data.local.entity.QuizAttempt
 
 import com.edusutra.app.data.local.dao.UserDao
 import com.edusutra.app.data.local.dao.ProgressDao
 import com.edusutra.app.data.local.dao.MasteryDao
 import com.edusutra.app.data.local.dao.RevisionDao
+import com.edusutra.app.data.local.dao.CourseDao
+import com.edusutra.app.data.local.dao.EnrollmentDao
+import com.edusutra.app.data.local.dao.LearningPathDao
 import com.edusutra.app.data.local.dao.DiagnosticQuestionDao
 import com.edusutra.app.data.local.dao.QuizQuestionDao
 import com.edusutra.app.data.local.dao.QuizAttemptDao
+import com.edusutra.app.data.local.entity.DiagnosticQuestion
+import com.edusutra.app.data.local.entity.QuizQuestion
+import com.edusutra.app.data.local.entity.QuizAttempt
+import com.edusutra.app.data.local.entity.Course
+import com.edusutra.app.data.local.entity.Enrollment
+import com.edusutra.app.data.local.entity.LearningPath
 
 @Database(
     entities = [
@@ -29,9 +35,12 @@ import com.edusutra.app.data.local.dao.QuizAttemptDao
         DiagnosticQuestion::class,
         QuizQuestion::class,
         QuizAttempt::class,
+        Course::class,
+        Enrollment::class,
+        LearningPath::class
     ],
-    version = 1,
-    exportSchema = false,
+    version = 2,
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -43,9 +52,11 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun revisionDao(): RevisionDao
 
+    abstract fun courseDao(): CourseDao
+    abstract fun enrollmentDao(): EnrollmentDao
+    abstract fun learningPathDao(): LearningPathDao
     abstract fun diagnosticQuestionDao(): DiagnosticQuestionDao
-
     abstract fun quizQuestionDao(): QuizQuestionDao
-
     abstract fun quizAttemptDao(): QuizAttemptDao
+
 }
