@@ -21,5 +21,5 @@ data class User(
 
     val profileImage: String? = null,
 
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = System.currentTimeMillis()
 )

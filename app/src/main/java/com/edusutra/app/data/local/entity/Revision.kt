@@ -23,5 +23,5 @@ data class Revision(
 
     val scheduledDate: Long? = null,
 
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = System.currentTimeMillis()
 )
