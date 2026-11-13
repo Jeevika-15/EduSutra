@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
 
         val database = DatabaseProvider.getDatabase(applicationContext)
 
+        // Repositories
         val progressRepository = ProgressRepository(
             database.progressDao(),
             database.masteryDao(),
@@ -45,33 +46,39 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    val progressViewModel: ProgressViewModel =
-                        viewModel(
-                            factory = ProgressViewModelFactory(
-                                progressRepository
-                            )
+                    // Progress ViewModel
+                    val progressViewModel: ProgressViewModel = viewModel(
+                        factory = ProgressViewModelFactory(
+                            progressRepository
                         )
+                    )
 
-                    val userViewModel: UserViewModel =
-                        viewModel(
-                            factory = UserViewModelFactory(
-                                userRepository
-                            )
+                    // User ViewModel
+                    val userViewModel: UserViewModel = viewModel(
+                        factory = UserViewModelFactory(
+                            userRepository
                         )
+                    )
 
+                    // Load demo data and user information
                     LaunchedEffect(Unit) {
-                        DemoDataSeeder.seedIfEmpty(progressRepository, userRepository)
+                        DemoDataSeeder.seedIfEmpty(
+                            progressRepository,
+                            userRepository
+                        )
 
                         progressViewModel.loadProgress(userId = 1)
                         userViewModel.loadUser(userId = 1)
                     }
 
+                    // Observe UI states
                     val progressState by
                     progressViewModel.uiState.collectAsState()
 
                     val userState by
                     userViewModel.uiState.collectAsState()
 
+                    // App Navigation
                     AppNavigation(
                         progressUiState = progressState,
 
@@ -83,6 +90,10 @@ class MainActivity : ComponentActivity() {
 
                         onSaveProfile = { updatedUser ->
                             userViewModel.updateUser(updatedUser)
+                        },
+
+                        onLogout = {
+                            // Logout callback
                         }
                     )
                 }

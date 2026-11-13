@@ -18,6 +18,7 @@ import com.edusutra.app.ui.screens.progress.ResultsScreen
 import com.edusutra.app.ui.screens.progress.MasteryHistoryScreen
 import com.edusutra.app.ui.screens.profile.ProfileScreen
 import com.edusutra.app.ui.screens.learning.AiTutorScreen
+import com.edusutra.app.ui.screens.quiz.DiagnosticScreen
 import com.edusutra.app.viewmodel.ProgressUiState
 
 @Composable
@@ -41,11 +42,10 @@ fun AppNavigation(
             PlaceholderScreen(
                 title = "Welcome to Edu Sutra",
                 description = "Your Personal Learning Path",
-                buttonText = "Get Started",
-                onClick = {
-                    navController.navigate(Screen.Onboarding.route)
-                }
-            )
+                buttonText = "Get Started"
+            ) {
+                navController.navigate(Screen.Onboarding.route)
+            }
         }
 
         // ONBOARDING
@@ -53,11 +53,10 @@ fun AppNavigation(
             PlaceholderScreen(
                 title = "Welcome!",
                 description = "Start your personalised learning journey.",
-                buttonText = "Continue to Home",
-                onClick = {
-                    navController.navigate(Screen.Home.route)
-                }
-            )
+                buttonText = "Continue to Home"
+            ) {
+                navController.navigate(Screen.Home.route)
+            }
         }
 
         // DASHBOARD
@@ -70,11 +69,10 @@ fun AppNavigation(
             PlaceholderScreen(
                 title = "Course Catalogue",
                 description = "Explore available courses.",
-                buttonText = "View Progress",
-                onClick = {
-                    navController.navigate(Screen.Progress.route)
-                }
-            )
+                buttonText = "View Progress"
+            ) {
+                navController.navigate(Screen.Progress.route)
+            }
         }
 
         // PROGRESS
@@ -112,6 +110,7 @@ fun AppNavigation(
                 onSaveProfile = onSaveProfile,
                 onLogout = {
                     onLogout()
+
                     navController.navigate(Screen.Login.route) {
                         popUpTo(navController.graph.id) {
                             inclusive = true
@@ -122,32 +121,42 @@ fun AppNavigation(
             )
         }
 
-        // OTHER MODULES - TO BE INTEGRATED
+        // COURSE DETAILS
         composable(Screen.CourseDetails.route) {
             SimpleScreen("Course Details")
         }
 
+        // LEARNING PATH
         composable(Screen.LearningPath.route) {
             SimpleScreen("Personalised Learning Path")
         }
 
+        // ENROLLMENT
         composable(Screen.Enrollment.route) {
             SimpleScreen("Course Enrollment")
         }
 
+        // DIAGNOSTIC TEST
         composable(Screen.Diagnostic.route) {
-            SimpleScreen("Diagnostic Assessment")
+            DiagnosticScreen(
+                onSubmit = {
+                    navController.navigate(Screen.Home.route)
+                }
+            )
         }
 
+        // LESSON PLAYER
         composable(Screen.Lesson.route) {
             SimpleScreen("Lesson Player")
         }
 
+        // PRACTICE QUIZ
         composable(Screen.Quiz.route) {
             SimpleScreen("Practice Quiz")
         }
     }
 }
+
 
 // DASHBOARD WITH NAVIGATION TO YOUR MODULES
 
@@ -164,12 +173,12 @@ fun DashboardNavigationScreen(
     ) {
 
         Text(
-            "Edu Sutra",
+            text = "Edu Sutra",
             style = MaterialTheme.typography.headlineLarge
         )
 
         Text(
-            "Your Personal Learning Path",
+            text = "Your Personal Learning Path",
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -201,6 +210,7 @@ fun DashboardNavigationScreen(
     }
 }
 
+
 @Composable
 fun DashboardButton(
     title: String,
@@ -210,9 +220,10 @@ fun DashboardButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(title)
+        Text(text = title)
     }
 }
+
 
 // REUSABLE PLACEHOLDER SCREEN
 
@@ -232,24 +243,25 @@ fun PlaceholderScreen(
     ) {
 
         Text(
-            title,
+            text = title,
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            description,
+            text = description,
             style = MaterialTheme.typography.bodyLarge
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(onClick = onClick) {
-            Text(buttonText)
+            Text(text = buttonText)
         }
     }
 }
+
 
 // SIMPLE PLACEHOLDER FOR OTHER TEAM MODULES
 
@@ -260,7 +272,7 @@ fun SimpleScreen(title: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            title,
+            text = title,
             style = MaterialTheme.typography.headlineMedium
         )
     }

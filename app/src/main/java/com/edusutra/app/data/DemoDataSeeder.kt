@@ -1,12 +1,12 @@
 
 package com.edusutra.app.data
 
-import com.edusutra.app.data.repository.ProgressRepository
-import com.edusutra.app.data.repository.UserRepository
 import com.edusutra.app.data.local.entity.User
 import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Mastery
 import com.edusutra.app.data.local.entity.Revision
+import com.edusutra.app.data.repository.ProgressRepository
+import com.edusutra.app.data.repository.UserRepository
 import kotlinx.coroutines.flow.first
 
 object DemoDataSeeder {

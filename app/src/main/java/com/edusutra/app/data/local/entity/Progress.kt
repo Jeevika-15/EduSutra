@@ -21,5 +21,5 @@ data class Progress(
 
     val totalStudyMinutes: Int = 0,
 
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
 )

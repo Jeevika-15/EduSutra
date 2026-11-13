@@ -2,8 +2,8 @@ package com.edusutra.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Mastery
+import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Revision
 import com.edusutra.app.data.repository.ProgressRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +16,11 @@ data class ProgressUiState(
     val progressList: List<Progress> = emptyList(),
     val masteryList: List<Mastery> = emptyList(),
     val revisionList: List<Revision> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
 )
 
 class ProgressViewModel(
-    private val repository: ProgressRepository
+    private val repository: ProgressRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProgressUiState())
@@ -35,14 +35,14 @@ class ProgressViewModel(
             combine(
                 repository.getProgress(userId),
                 repository.getMastery(userId),
-                repository.getRevisions(userId)
+                repository.getRevisions(userId),
             ) { progress, mastery, revisions ->
 
                 ProgressUiState(
                     progressList = progress,
                     masteryList = mastery,
                     revisionList = revisions,
-                    isLoading = false
+                    isLoading = false,
                 )
 
             }.collect { state ->
