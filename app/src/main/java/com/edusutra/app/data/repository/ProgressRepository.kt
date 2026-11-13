@@ -1,3 +1,4 @@
+
 package com.edusutra.app.data.repository
 
 import com.edusutra.app.data.local.dao.ProgressDao
@@ -15,6 +16,13 @@ class ProgressRepository(
 
     fun getProgress(userId: Int) =
         progressDao.getProgressByUser(userId)
+
+    suspend fun getCourseProgress(
+        userId: Int,
+        courseId: Int
+    ): Progress? {
+        return progressDao.getCourseProgress(userId, courseId)
+    }
 
     suspend fun saveProgress(progress: Progress) =
         progressDao.insertProgress(progress)

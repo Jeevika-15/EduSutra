@@ -5,19 +5,25 @@ import com.edusutra.app.data.local.entity.User
 import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Mastery
 import com.edusutra.app.data.local.entity.Revision
+import com.edusutra.app.data.local.entity.Course
+import com.edusutra.app.data.local.entity.LearningPath
+
 import com.edusutra.app.data.repository.ProgressRepository
 import com.edusutra.app.data.repository.UserRepository
+import com.edusutra.app.data.repository.CourseRepository
+import com.edusutra.app.data.repository.LearningPathRepository
+
 import kotlinx.coroutines.flow.first
 
 object DemoDataSeeder {
 
+    // Seed user, progress, mastery and revision data
     suspend fun seedIfEmpty(
         repository: ProgressRepository,
         userRepository: UserRepository
     ) {
         val userId = 1
 
-        // Create a demo user if one does not already exist
         val existingUser = userRepository.getUserById(userId)
 
         if (existingUser == null) {
@@ -45,7 +51,6 @@ object DemoDataSeeder {
             return
         }
 
-        // Sample course progress
         repository.saveProgress(
             Progress(
                 userId = userId,
@@ -68,7 +73,6 @@ object DemoDataSeeder {
             )
         )
 
-        // Sample topic mastery
         repository.saveMastery(
             Mastery(
                 userId = userId,
@@ -93,7 +97,6 @@ object DemoDataSeeder {
             )
         )
 
-        // Sample revision tasks
         repository.saveRevision(
             Revision(
                 userId = userId,
@@ -113,5 +116,109 @@ object DemoDataSeeder {
                 priority = "Medium"
             )
         )
+    }
+
+    // Seed sample courses
+    suspend fun seedCoursesIfEmpty(repository: CourseRepository) {
+
+        val existingCourses = repository.allCourses.first()
+
+        if (existingCourses.isNotEmpty()) return
+
+        val courses = listOf(
+            Course(
+                title = "Introduction to Programming",
+                description = "Learn programming fundamentals and problem solving.",
+                category = "Programming",
+                duration = "6 Weeks",
+                difficulty = "Beginner",
+                instructor = "John Smith"
+            ),
+            Course(
+                title = "Data Structures and Algorithms",
+                description = "Understand arrays, linked lists, trees and algorithms.",
+                category = "Computer Science",
+                duration = "8 Weeks",
+                difficulty = "Intermediate",
+                instructor = "David Kumar"
+            ),
+            Course(
+                title = "Database Management Systems",
+                description = "Learn SQL, database design and normalization.",
+                category = "Database",
+                duration = "5 Weeks",
+                difficulty = "Intermediate",
+                instructor = "Sarah Wilson"
+            ),
+            Course(
+                title = "Artificial Intelligence",
+                description = "Explore AI concepts and intelligent systems.",
+                category = "Artificial Intelligence",
+                duration = "7 Weeks",
+                difficulty = "Advanced",
+                instructor = "Michael Lee"
+            ),
+            Course(
+                title = "Web Development",
+                description = "Learn HTML, CSS and JavaScript fundamentals.",
+                category = "Web Development",
+                duration = "6 Weeks",
+                difficulty = "Beginner",
+                instructor = "Emily Brown"
+            )
+        )
+
+        repository.insertCourses(courses)
+    }
+
+    // Seed learning path steps for every course
+    suspend fun seedLearningPathIfEmpty(
+        courseRepository: CourseRepository,
+        learningPathRepository: LearningPathRepository
+    ) {
+        val courses = courseRepository.allCourses.first()
+        val userId = 1
+
+        for (course in courses) {
+
+            val existingSteps = learningPathRepository
+                .getLearningPath(userId, course.courseId)
+                .first()
+
+            if (existingSteps.isNotEmpty()) continue
+
+            val steps = listOf(
+                LearningPath(
+                    userId = userId,
+                    courseId = course.courseId,
+                    stepTitle = "Step 1: Introduction",
+                    description = "Understand the basics of ${course.title}.",
+                    stepOrder = 1
+                ),
+                LearningPath(
+                    userId = userId,
+                    courseId = course.courseId,
+                    stepTitle = "Step 2: Core Concepts",
+                    description = "Learn the important concepts and fundamentals.",
+                    stepOrder = 2
+                ),
+                LearningPath(
+                    userId = userId,
+                    courseId = course.courseId,
+                    stepTitle = "Step 3: Practical Learning",
+                    description = "Practice what you have learned with examples.",
+                    stepOrder = 3
+                ),
+                LearningPath(
+                    userId = userId,
+                    courseId = course.courseId,
+                    stepTitle = "Step 4: Final Assessment",
+                    description = "Review your knowledge and test your understanding.",
+                    stepOrder = 4
+                )
+            )
+
+            learningPathRepository.insertSteps(steps)
+        }
     }
 }

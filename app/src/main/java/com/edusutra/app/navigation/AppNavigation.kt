@@ -1,28 +1,40 @@
 
 package com.edusutra.app.navigation
 
-import com.edusutra.app.ui.screens.quiz.AdaptiveQuizScreen
-import com.edusutra.app.ui.screens.quiz.EnrollmentScreen
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 
 import com.edusutra.app.data.local.entity.User
+
 import com.edusutra.app.ui.screens.progress.ProgressScreen
 import com.edusutra.app.ui.screens.progress.ResultsScreen
 import com.edusutra.app.ui.screens.progress.MasteryHistoryScreen
 import com.edusutra.app.ui.screens.profile.ProfileScreen
 import com.edusutra.app.ui.screens.learning.AiTutorScreen
+import com.edusutra.app.ui.screens.learning.LearningPathScreen
+import com.edusutra.app.ui.screens.courses.CourseCatalogueScreen
+import com.edusutra.app.ui.screens.courses.CourseDetailsScreen
+import com.edusutra.app.ui.screens.courses.SyllabusScreen
+import com.edusutra.app.ui.screens.quiz.AdaptiveQuizScreen
+import com.edusutra.app.ui.screens.quiz.EnrollmentScreen
 import com.edusutra.app.ui.screens.quiz.DiagnosticScreen
-import com.edusutra.app.viewmodel.ProgressUiState
 import com.edusutra.app.ui.screens.quiz.SimulationScreen
+
+import com.edusutra.app.viewmodel.ProgressUiState
+import com.edusutra.app.viewmodel.CourseCatalogueViewModel
+import com.edusutra.app.viewmodel.CourseDetailsViewModel
+import com.edusutra.app.viewmodel.LearningPathViewModel
 
 @Composable
 fun AppNavigation(
@@ -30,10 +42,16 @@ fun AppNavigation(
     onCompleteRevision: (Int) -> Unit,
     user: User? = null,
     onSaveProfile: (User) -> Unit = {},
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    courseCatalogueViewModel: CourseCatalogueViewModel,
+    courseDetailsViewModel: CourseDetailsViewModel,
+    learningPathViewModel: LearningPathViewModel
 ) {
-
     val navController = rememberNavController()
+
+    val catalogueState by courseCatalogueViewModel.uiState.collectAsState()
+    val detailsState by courseDetailsViewModel.uiState.collectAsState()
+    val learningPathState by learningPathViewModel.uiState.collectAsState()
 
     NavHost(
         navController = navController,
@@ -62,20 +80,144 @@ fun AppNavigation(
             }
         }
 
-        // DASHBOARD
+        // HOME DASHBOARD
         composable(Screen.Home.route) {
             DashboardNavigationScreen(navController)
         }
 
-        // COURSES
+        // COURSE CATALOGUE
         composable(Screen.Courses.route) {
-            PlaceholderScreen(
-                title = "Course Catalogue",
-                description = "Explore available courses.",
-                buttonText = "View Progress"
-            ) {
-                navController.navigate(Screen.Progress.route)
+            LaunchedEffect(Unit) {
+                courseCatalogueViewModel.loadCourses()
             }
+
+            CourseCatalogueScreen(
+                courses = catalogueState.courses,
+                onCourseClick = { courseId ->
+                    navController.navigate(
+                        "${Screen.CourseDetails.route}/$courseId"
+                    )
+                },
+                onSearch = { query ->
+                    courseCatalogueViewModel.searchCourses(query)
+                }
+            )
+        }
+
+        // COURSE DETAILS
+        composable(
+            route = "${Screen.CourseDetails.route}/{courseId}",
+            arguments = listOf(
+                navArgument("courseId") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+
+            val courseId =
+                backStackEntry.arguments?.getInt("courseId") ?: 0
+
+            LaunchedEffect(courseId) {
+                courseDetailsViewModel.loadCourse(courseId, 1)
+            }
+
+            val course = detailsState.course
+
+            if (course != null) {
+                CourseDetailsScreen(
+                    course = course,
+                    isEnrolled = detailsState.isEnrolled,
+                    onEnrollClick = {
+                        courseDetailsViewModel.enrollUser(1, courseId)
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onSyllabusClick = {
+                        navController.navigate(
+                            "${Screen.Syllabus.route}/$courseId"
+                        )
+                    },
+                    onLearningPathClick = {
+                        navController.navigate(
+                            "${Screen.LearningPath.route}/$courseId"
+                        )
+                    }
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+
+        // SYLLABUS
+        composable(
+            route = "${Screen.Syllabus.route}/{courseId}",
+            arguments = listOf(
+                navArgument("courseId") {
+                    type = NavType.IntType
+                }
+            )
+        ) {
+            BackHandler {
+                navController.popBackStack()
+            }
+
+            val units = listOf(
+                "Unit 1: Introduction" to listOf(
+                    "Basic Concepts",
+                    "Fundamentals",
+                    "Applications"
+                ),
+                "Unit 2: Core Concepts" to listOf(
+                    "Important Topics",
+                    "Practical Examples",
+                    "Case Studies"
+                ),
+                "Unit 3: Advanced Topics" to listOf(
+                    "Advanced Concepts",
+                    "Real-world Applications"
+                )
+            )
+
+            SyllabusScreen(
+                courseName = detailsState.course?.title ?: "Course",
+                units = units
+            )
+        }
+
+        // PERSONALIZED LEARNING PATH
+        composable(
+            route = "${Screen.LearningPath.route}/{courseId}",
+            arguments = listOf(
+                navArgument("courseId") {
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+
+            val courseId =
+                backStackEntry.arguments?.getInt("courseId") ?: 0
+
+            LaunchedEffect(courseId) {
+                learningPathViewModel.loadLearningPath(1, courseId)
+            }
+
+            BackHandler {
+                navController.popBackStack()
+            }
+
+            LearningPathScreen(
+                courseName = detailsState.course?.title ?: "My Course",
+                learningSteps = learningPathState.steps,
+                onStepCompleted = { step ->
+                    learningPathViewModel.updateStep(step)
+                }
+            )
         }
 
         // PROGRESS
@@ -86,7 +228,7 @@ fun AppNavigation(
             )
         }
 
-        // RESULTS AND WEAK AREAS
+        // RESULTS
         composable(Screen.Results.route) {
             ResultsScreen(
                 masteryList = progressUiState.masteryList,
@@ -124,16 +266,6 @@ fun AppNavigation(
             )
         }
 
-        // COURSE DETAILS
-        composable(Screen.CourseDetails.route) {
-            SimpleScreen("Course Details")
-        }
-
-        // LEARNING PATH
-        composable(Screen.LearningPath.route) {
-            SimpleScreen("Personalised Learning Path")
-        }
-
         // ENROLLMENT
         composable(Screen.Enrollment.route) {
             EnrollmentScreen(
@@ -152,7 +284,7 @@ fun AppNavigation(
             )
         }
 
-        // LESSON PLAYER
+        // LESSON
         composable(Screen.Lesson.route) {
             SimpleScreen("Lesson Player")
         }
@@ -180,9 +312,7 @@ fun AppNavigation(
     }
 }
 
-
-// DASHBOARD WITH NAVIGATION TO YOUR MODULES
-
+// DASHBOARD
 @Composable
 fun DashboardNavigationScreen(
     navController: NavHostController
@@ -194,7 +324,6 @@ fun DashboardNavigationScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Edu Sutra",
             style = MaterialTheme.typography.headlineLarge
@@ -249,7 +378,6 @@ fun DashboardNavigationScreen(
     }
 }
 
-
 @Composable
 fun DashboardButton(
     title: String,
@@ -262,9 +390,6 @@ fun DashboardButton(
         Text(text = title)
     }
 }
-
-
-// REUSABLE PLACEHOLDER SCREEN
 
 @Composable
 fun PlaceholderScreen(
@@ -280,7 +405,6 @@ fun PlaceholderScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium
@@ -300,9 +424,6 @@ fun PlaceholderScreen(
         }
     }
 }
-
-
-// SIMPLE PLACEHOLDER FOR OTHER TEAM MODULES
 
 @Composable
 fun SimpleScreen(title: String) {
