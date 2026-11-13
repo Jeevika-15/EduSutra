@@ -1,6 +1,8 @@
 
 package com.edusutra.app.navigation
 
+import com.edusutra.app.ui.screens.quiz.AdaptiveQuizScreen
+import com.edusutra.app.ui.screens.quiz.EnrollmentScreen
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,6 +22,7 @@ import com.edusutra.app.ui.screens.profile.ProfileScreen
 import com.edusutra.app.ui.screens.learning.AiTutorScreen
 import com.edusutra.app.ui.screens.quiz.DiagnosticScreen
 import com.edusutra.app.viewmodel.ProgressUiState
+import com.edusutra.app.ui.screens.quiz.SimulationScreen
 
 @Composable
 fun AppNavigation(
@@ -34,7 +37,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Home.route
     ) {
 
         // LOGIN
@@ -133,7 +136,11 @@ fun AppNavigation(
 
         // ENROLLMENT
         composable(Screen.Enrollment.route) {
-            SimpleScreen("Course Enrollment")
+            EnrollmentScreen(
+                onConfirmEnrollment = {
+                    navController.navigate(Screen.Diagnostic.route)
+                }
+            )
         }
 
         // DIAGNOSTIC TEST
@@ -152,7 +159,23 @@ fun AppNavigation(
 
         // PRACTICE QUIZ
         composable(Screen.Quiz.route) {
-            SimpleScreen("Practice Quiz")
+            AdaptiveQuizScreen(
+                onSubmit = {
+                    navController.navigate(Screen.Results.route)
+                }
+            )
+        }
+
+        // LEARNING SIMULATION
+        composable(Screen.Simulation.route) {
+            SimulationScreen(
+                onStartSimulation = {
+                    navController.navigate(Screen.Results.route)
+                },
+                onExit = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
@@ -186,6 +209,22 @@ fun DashboardNavigationScreen(
 
         DashboardButton("Explore Courses") {
             navController.navigate(Screen.Courses.route)
+        }
+
+        DashboardButton("Course Enrollment") {
+            navController.navigate(Screen.Enrollment.route)
+        }
+
+        DashboardButton("Diagnostic Test") {
+            navController.navigate(Screen.Diagnostic.route)
+        }
+
+        DashboardButton("Practice Quiz") {
+            navController.navigate(Screen.Quiz.route)
+        }
+
+        DashboardButton("Learning Simulation") {
+            navController.navigate(Screen.Simulation.route)
         }
 
         DashboardButton("My Learning Progress") {

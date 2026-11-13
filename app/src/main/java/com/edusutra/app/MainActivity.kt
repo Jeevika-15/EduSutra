@@ -1,4 +1,3 @@
-
 package com.edusutra.app
 
 import android.os.Bundle
@@ -10,7 +9,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-
 import com.edusutra.app.data.DemoDataSeeder
 import com.edusutra.app.data.local.DatabaseProvider
 import com.edusutra.app.data.repository.ProgressRepository
@@ -45,7 +43,6 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     color = MaterialTheme.colorScheme.background
                 ) {
-
                     // Progress ViewModel
                     val progressViewModel: ProgressViewModel = viewModel(
                         factory = ProgressViewModelFactory(
@@ -72,26 +69,19 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Observe UI states
-                    val progressState by
-                    progressViewModel.uiState.collectAsState()
-
-                    val userState by
-                    userViewModel.uiState.collectAsState()
+                    val progressState by progressViewModel.uiState.collectAsState()
+                    val userState by userViewModel.uiState.collectAsState()
 
                     // App Navigation
                     AppNavigation(
                         progressUiState = progressState,
-
                         onCompleteRevision = { revisionId ->
                             progressViewModel.completeRevision(revisionId)
                         },
-
                         user = userState.user,
-
                         onSaveProfile = { updatedUser ->
                             userViewModel.updateUser(updatedUser)
                         },
-
                         onLogout = {
                             // Logout callback
                         }

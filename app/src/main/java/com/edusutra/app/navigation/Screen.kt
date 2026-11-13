@@ -27,6 +27,8 @@ sealed class Screen(val route: String) {
 
     data object Quiz : Screen("quiz")
 
+    data object Simulation : Screen("simulation")
+
     // Results and progress
     data object Results : Screen("results")
 
