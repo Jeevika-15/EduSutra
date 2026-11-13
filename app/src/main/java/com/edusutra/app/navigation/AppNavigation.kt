@@ -1,4 +1,3 @@
-
 package com.edusutra.app.navigation
 
 import androidx.compose.foundation.layout.*
@@ -11,19 +10,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.edusutra.app.ui.screens.progress.ProgressScreen
+import com.edusutra.app.ui.screens.quiz.DiagnosticScreen
 import com.edusutra.app.viewmodel.ProgressUiState
 
 @Composable
 fun AppNavigation(
     progressUiState: ProgressUiState,
-    onCompleteRevision: (Int) -> Unit
+    onCompleteRevision: (Int) -> Unit,
 ) {
 
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Login.route,
     ) {
 
         composable(Screen.Login.route) {
@@ -31,10 +31,9 @@ fun AppNavigation(
                 title = "Welcome to Edu Sutra",
                 description = "Your Personal Learning Path",
                 buttonText = "Get Started",
-                onClick = {
-                    navController.navigate(Screen.Onboarding.route)
-                }
-            )
+            ) {
+                navController.navigate(Screen.Onboarding.route)
+            }
         }
 
         composable(Screen.Onboarding.route) {
@@ -42,10 +41,9 @@ fun AppNavigation(
                 title = "Welcome!",
                 description = "Start your personalised learning journey.",
                 buttonText = "Continue to Home",
-                onClick = {
-                    navController.navigate(Screen.Home.route)
-                }
-            )
+            ) {
+                navController.navigate(Screen.Home.route)
+            }
         }
 
         composable(Screen.Home.route) {
@@ -53,10 +51,9 @@ fun AppNavigation(
                 title = "Edu Sutra Dashboard",
                 description = "Your learning journey starts here.",
                 buttonText = "Explore Courses",
-                onClick = {
-                    navController.navigate(Screen.Courses.route)
-                }
-            )
+            ) {
+                navController.navigate(Screen.Courses.route)
+            }
         }
 
         composable(Screen.Courses.route) {
@@ -64,17 +61,16 @@ fun AppNavigation(
                 title = "Course Catalogue",
                 description = "Explore available courses.",
                 buttonText = "View Progress",
-                onClick = {
-                    navController.navigate(Screen.Progress.route)
-                }
-            )
+            ) {
+                navController.navigate(Screen.Progress.route)
+            }
         }
 
         // Actual Progress screen connected to Room database
         composable(Screen.Progress.route) {
             ProgressScreen(
                 uiState = progressUiState,
-                onCompleteRevision = onCompleteRevision
+                onCompleteRevision = onCompleteRevision,
             )
         }
 
@@ -89,7 +85,7 @@ fun AppNavigation(
                             inclusive = true
                         }
                     }
-                }
+                },
             )
         }
 
@@ -106,7 +102,11 @@ fun AppNavigation(
         }
 
         composable(Screen.Diagnostic.route) {
-            SimpleScreen("Diagnostic Assessment")
+            DiagnosticScreen(
+                onSubmit = {
+                    navController.navigate(Screen.Home.route)
+                },
+            )
         }
 
         composable(Screen.Lesson.route) {
@@ -132,25 +132,25 @@ fun PlaceholderScreen(
     title: String,
     description: String,
     buttonText: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = description,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -165,11 +165,11 @@ fun PlaceholderScreen(
 fun SimpleScreen(title: String) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
         )
     }
 }

@@ -19,7 +19,7 @@ private val EduBlue = Color(0xFF52669A)
 @Composable
 fun ProgressScreen(
     uiState: ProgressUiState,
-    onCompleteRevision: (Int) -> Unit
+    onCompleteRevision: (Int) -> Unit,
 ) {
 
     val totalCompleted = uiState.progressList.sumOf {
@@ -53,20 +53,20 @@ fun ProgressScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+        verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
 
         item {
             Column {
                 Text(
                     text = "My Learning Progress",
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.headlineMedium,
                 )
 
                 Text(
                     text = "Track your learning journey with Edu Sutra.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -122,8 +122,8 @@ fun ProgressScreen(
 
                 StatisticCard(
                     title = "Completed Lessons",
-                    value = "$totalCompleted",
-                    modifier = Modifier.weight(1f)
+                    value = totalCompleted.toString(),
+                    modifier = Modifier.weight(1f),
                 )
             }
         }

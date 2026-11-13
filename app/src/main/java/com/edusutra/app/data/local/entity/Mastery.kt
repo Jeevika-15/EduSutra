@@ -23,5 +23,5 @@ data class Mastery(
 
     val masteryLevel: String = "Beginner",
 
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
 )
