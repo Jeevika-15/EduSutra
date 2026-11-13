@@ -1,4 +1,3 @@
-
 package com.edusutra.app.navigation
 
 import androidx.activity.compose.BackHandler
@@ -19,6 +18,7 @@ import com.edusutra.app.ui.screens.courses.CourseCatalogueScreen
 import com.edusutra.app.ui.screens.courses.CourseDetailsScreen
 import com.edusutra.app.ui.screens.courses.SyllabusScreen
 import com.edusutra.app.ui.screens.learning.LearningPathScreen
+import com.edusutra.app.ui.screens.quiz.DiagnosticScreen
 
 import com.edusutra.app.viewmodel.ProgressUiState
 import com.edusutra.app.viewmodel.CourseCatalogueViewModel
@@ -47,9 +47,9 @@ fun AppNavigation(
         // LOGIN
         composable(Screen.Login.route) {
             PlaceholderScreen(
-                "Welcome to Edu Sutra",
-                "Your Personal Learning Path",
-                "Get Started"
+                title = "Welcome to Edu Sutra",
+                description = "Your Personal Learning Path",
+                buttonText = "Get Started",
             ) {
                 navController.navigate(Screen.Onboarding.route)
             }
@@ -58,9 +58,9 @@ fun AppNavigation(
         // ONBOARDING
         composable(Screen.Onboarding.route) {
             PlaceholderScreen(
-                "Welcome!",
-                "Start your personalised learning journey.",
-                "Continue to Home"
+                title = "Welcome!",
+                description = "Start your personalised learning journey.",
+                buttonText = "Continue to Home",
             ) {
                 navController.navigate(Screen.Home.route)
             }
@@ -69,9 +69,9 @@ fun AppNavigation(
         // HOME
         composable(Screen.Home.route) {
             PlaceholderScreen(
-                "Edu Sutra Dashboard",
-                "Your learning journey starts here.",
-                "Explore Courses"
+                title = "Edu Sutra Dashboard",
+                description = "Your learning journey starts here.",
+                buttonText = "Explore Courses",
             ) {
                 courseCatalogueViewModel.loadCourses()
                 navController.navigate(Screen.Courses.route)
@@ -80,7 +80,6 @@ fun AppNavigation(
 
         // COURSE CATALOGUE
         composable(Screen.Courses.route) {
-
             LaunchedEffect(Unit) {
                 courseCatalogueViewModel.loadCourses()
             }
@@ -107,7 +106,6 @@ fun AppNavigation(
                 }
             )
         ) { backStackEntry ->
-
             val courseId =
                 backStackEntry.arguments?.getInt("courseId") ?: 0
 
@@ -118,32 +116,26 @@ fun AppNavigation(
             val course = detailsState.course
 
             if (course != null) {
-
                 CourseDetailsScreen(
                     course = course,
                     isEnrolled = detailsState.isEnrolled,
-
                     onEnrollClick = {
                         courseDetailsViewModel.enrollUser(1, courseId)
                     },
-
                     onBackClick = {
                         navController.popBackStack()
                     },
-
                     onSyllabusClick = {
                         navController.navigate(
                             "${Screen.Syllabus.route}/$courseId"
                         )
                     },
-
                     onLearningPathClick = {
                         navController.navigate(
                             "${Screen.LearningPath.route}/$courseId"
                         )
                     }
                 )
-
             } else {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -163,7 +155,6 @@ fun AppNavigation(
                 }
             )
         ) { backStackEntry ->
-
             val courseId =
                 backStackEntry.arguments?.getInt("courseId") ?: 0
 
@@ -203,7 +194,6 @@ fun AppNavigation(
                 }
             )
         ) { backStackEntry ->
-
             val courseId =
                 backStackEntry.arguments?.getInt("courseId") ?: 0
 
@@ -235,21 +225,30 @@ fun AppNavigation(
         // PROFILE
         composable(Screen.Profile.route) {
             PlaceholderScreen(
-                "My Profile",
-                "Manage your student profile.",
-                "Back to Home"
-            ) {
-                navController.navigate(Screen.Home.route)
-            }
+                title = "My Profile",
+                description = "Manage your student profile.",
+                buttonText = "Back to Home",
+                onClick = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
-        // OTHER EXISTING SCREENS
+        // OTHER SCREENS
         composable(Screen.Enrollment.route) {
             SimpleScreen("Course Enrollment")
         }
 
         composable(Screen.Diagnostic.route) {
-            SimpleScreen("Diagnostic Assessment")
+            DiagnosticScreen(
+                onSubmit = {
+                    navController.navigate(Screen.Home.route)
+                }
+            )
         }
 
         composable(Screen.Lesson.route) {
@@ -285,14 +284,14 @@ fun PlaceholderScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            title,
+            text = title,
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            description,
+            text = description,
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -311,7 +310,7 @@ fun SimpleScreen(title: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            title,
+            text = title,
             style = MaterialTheme.typography.headlineMedium
         )
     }

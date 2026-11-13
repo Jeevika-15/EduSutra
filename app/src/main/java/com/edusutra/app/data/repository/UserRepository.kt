@@ -4,7 +4,7 @@ import com.edusutra.app.data.local.dao.UserDao
 import com.edusutra.app.data.local.entity.User
 
 class UserRepository(
-    private val userDao: UserDao
+    private val userDao: UserDao,
 ) {
 
     suspend fun registerUser(user: User): Long {

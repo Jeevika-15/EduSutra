@@ -35,15 +35,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val database = DatabaseProvider.getDatabase(applicationContext)
+        val database =
+            DatabaseProvider.getDatabase(applicationContext)
 
-        // Repositories
+        // Progress Repository
         val repository = ProgressRepository(
             database.progressDao(),
             database.masteryDao(),
             database.revisionDao()
         )
 
+        // Courses Repositories
         val courseRepository =
             CourseRepository(database.courseDao())
 
@@ -90,7 +92,7 @@ class MainActivity : ComponentActivity() {
                             )
                         )
 
-                    // Seed all sample data
+                    // Seed sample data
                     LaunchedEffect(Unit) {
 
                         DemoDataSeeder.seedIfEmpty(repository)
@@ -104,7 +106,9 @@ class MainActivity : ComponentActivity() {
                             learningPathRepository
                         )
 
-                        progressViewModel.loadProgress(userId = 1)
+                        progressViewModel.loadProgress(
+                            userId = 1
+                        )
                     }
 
                     val uiState by

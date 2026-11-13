@@ -1,4 +1,3 @@
-
 package com.edusutra.app.data.local
 
 import android.content.Context
@@ -13,7 +12,6 @@ object DatabaseProvider {
 
     private val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
-
             db.execSQL("""
                 CREATE TABLE IF NOT EXISTS courses (
                     courseId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -59,6 +57,7 @@ object DatabaseProvider {
                 "edusutra_database"
             )
                 .addMigrations(MIGRATION_1_2)
+                .fallbackToDestructiveMigration()
                 .build()
 
             INSTANCE = instance

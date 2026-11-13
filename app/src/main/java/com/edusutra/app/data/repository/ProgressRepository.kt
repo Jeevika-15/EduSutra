@@ -10,7 +10,7 @@ import com.edusutra.app.data.local.entity.Revision
 class ProgressRepository(
     private val progressDao: ProgressDao,
     private val masteryDao: MasteryDao,
-    private val revisionDao: RevisionDao
+    private val revisionDao: RevisionDao,
 ) {
 
     fun getProgress(userId: Int) =
