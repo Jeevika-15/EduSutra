@@ -12,6 +12,7 @@ object DatabaseProvider {
 
     private val MIGRATION_1_2 = object : Migration(1, 2) {
         override fun migrate(db: SupportSQLiteDatabase) {
+            // Courses module (Madhav)
             db.execSQL("""
                 CREATE TABLE IF NOT EXISTS courses (
                     courseId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -44,6 +45,91 @@ object DatabaseProvider {
                     description TEXT NOT NULL,
                     stepOrder INTEGER NOT NULL,
                     isCompleted INTEGER NOT NULL
+                )
+            """)
+
+            // Quiz module (Bijjam) — exact column names match entity classes
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS diagnostic_questions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    topic TEXT NOT NULL,
+                    questionText TEXT NOT NULL,
+                    optionA TEXT NOT NULL,
+                    optionB TEXT NOT NULL,
+                    optionC TEXT NOT NULL,
+                    optionD TEXT NOT NULL,
+                    correctAnswer TEXT NOT NULL,
+                    explanation TEXT NOT NULL DEFAULT ''
+                )
+            """)
+
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS quiz_questions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    topic TEXT NOT NULL,
+                    difficulty TEXT NOT NULL,
+                    questionText TEXT NOT NULL,
+                    optionA TEXT NOT NULL,
+                    optionB TEXT NOT NULL,
+                    optionC TEXT NOT NULL,
+                    optionD TEXT NOT NULL,
+                    correctAnswer TEXT NOT NULL,
+                    explanation TEXT NOT NULL DEFAULT ''
+                )
+            """)
+
+            // QuizAttempt entity: id, quizType, questionId, selectedAnswer, correctAnswer, isCorrect, attemptedAt
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS quiz_attempts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    quizType TEXT NOT NULL,
+                    questionId INTEGER NOT NULL,
+                    selectedAnswer TEXT NOT NULL DEFAULT '',
+                    correctAnswer TEXT NOT NULL DEFAULT '',
+                    isCorrect INTEGER NOT NULL DEFAULT 0,
+                    attemptedAt INTEGER NOT NULL
+                )
+            """)
+
+            // Progress module (Jeevika) — also added in v1→v2
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS progress (
+                    progressId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    userId INTEGER NOT NULL,
+                    courseId INTEGER NOT NULL,
+                    completedLessons INTEGER NOT NULL DEFAULT 0,
+                    totalLessons INTEGER NOT NULL DEFAULT 0,
+                    completionPercentage REAL NOT NULL DEFAULT 0,
+                    totalStudyMinutes INTEGER NOT NULL DEFAULT 0,
+                    lastUpdated INTEGER NOT NULL
+                )
+            """)
+
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS mastery (
+                    masteryId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    userId INTEGER NOT NULL,
+                    courseId INTEGER NOT NULL,
+                    topicName TEXT NOT NULL,
+                    masteryScore REAL NOT NULL DEFAULT 0,
+                    questionsAttempted INTEGER NOT NULL DEFAULT 0,
+                    questionsCorrect INTEGER NOT NULL DEFAULT 0,
+                    masteryLevel TEXT NOT NULL DEFAULT 'Beginner',
+                    lastUpdated INTEGER NOT NULL
+                )
+            """)
+
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS revisions (
+                    revisionId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    userId INTEGER NOT NULL,
+                    courseId INTEGER NOT NULL,
+                    topicName TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    priority TEXT NOT NULL DEFAULT 'Medium',
+                    isCompleted INTEGER NOT NULL DEFAULT 0,
+                    scheduledDate INTEGER,
+                    createdAt INTEGER NOT NULL
                 )
             """)
         }
