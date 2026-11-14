@@ -49,6 +49,59 @@ object DatabaseProvider {
         }
     }
 
+    private val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS learner_profiles (
+                    userId INTEGER PRIMARY KEY NOT NULL,
+                    university TEXT NOT NULL,
+                    semester TEXT NOT NULL,
+                    learningGoal TEXT NOT NULL,
+                    dailyStudyTime TEXT NOT NULL,
+                    contentLanguage TEXT NOT NULL,
+                    streakDays INTEGER NOT NULL,
+                    isPro INTEGER NOT NULL,
+                    proPlanName TEXT NOT NULL,
+                    renewalDate TEXT NOT NULL
+                )
+            """)
+
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS syllabus_subjects (
+                    subjectId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    userId INTEGER NOT NULL,
+                    semester TEXT NOT NULL,
+                    subjectName TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    isIncluded INTEGER NOT NULL
+                )
+            """)
+
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS chat_messages (
+                    messageId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    userId INTEGER NOT NULL,
+                    courseContext TEXT NOT NULL,
+                    messageText TEXT NOT NULL,
+                    isFromUser INTEGER NOT NULL,
+                    sourceCitation TEXT,
+                    timestamp INTEGER NOT NULL
+                )
+            """)
+
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS downloaded_contents (
+                    downloadId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    lessonId INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    fileSize TEXT NOT NULL,
+                    filePath TEXT NOT NULL,
+                    downloadedAt INTEGER NOT NULL
+                )
+            """)
+        }
+    }
+
     fun getDatabase(context: Context): AppDatabase {
         return INSTANCE ?: synchronized(this) {
             val instance = Room.databaseBuilder(
@@ -56,7 +109,7 @@ object DatabaseProvider {
                 AppDatabase::class.java,
                 "edusutra_database"
             )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .fallbackToDestructiveMigration()
                 .build()
 
