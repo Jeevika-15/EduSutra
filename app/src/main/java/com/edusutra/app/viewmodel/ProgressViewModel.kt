@@ -69,6 +69,12 @@ class ProgressViewModel(
         }
     }
 
+    fun completeLesson(userId: Int, courseId: Int) {
+        viewModelScope.launch {
+            repository.completeLesson(userId, courseId)
+        }
+    }
+
     fun completeRevision(revisionId: Int) {
         viewModelScope.launch {
             repository.completeRevision(revisionId)

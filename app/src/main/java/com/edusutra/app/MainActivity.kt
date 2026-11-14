@@ -63,7 +63,6 @@ class MainActivity : ComponentActivity() {
                         DemoDataSeeder.seedIfEmpty(progressRepository, userRepository)
 
                         progressViewModel.loadProgress(userId = 1)
-                        userViewModel.loadUser(userId = 1)
                     }
 
                     val progressState by
@@ -83,6 +82,48 @@ class MainActivity : ComponentActivity() {
 
                         onSaveProfile = { updatedUser ->
                             userViewModel.updateUser(updatedUser)
+                        },
+
+                        isAuthLoading = userState.isLoading,
+                        authMessage = userState.message,
+                        isDevAuthenticated = userState.isDevAuthenticated,
+                        isDevOnboardingComplete = userState.isDevOnboardingComplete,
+
+                        onSignIn = { email, password ->
+                            userViewModel.loginUser(email, password)
+                        },
+
+                        onCreateAccount = { email, password ->
+                            @Suppress("UNUSED_PARAMETER")
+                            val unusedEmail = email
+                            @Suppress("UNUSED_PARAMETER")
+                            val unusedPassword = password
+                            // Navigation to onboarding happens in AppNavigation.
+                            // No User record is created here until real profile
+                            // fields exist and Firebase Auth is configured.
+                        },
+
+                        onForgotPassword = { email ->
+                            userViewModel.requestPasswordReset(email)
+                        },
+
+                        onContinueOnboarding = { university, semester, goal, studyTime, language ->
+                            // No User record is persisted here: required profile
+                            // fields (name, email) come from an authenticated
+                            // account, and Firebase Auth is not configured yet.
+                            @Suppress("UNUSED_PARAMETER")
+                            val unused = listOf(university, semester, goal, studyTime, language)
+                            userViewModel.completeDevOnboarding()
+                        },
+
+                        onMarkLessonComplete = { userId, courseId ->
+                            progressViewModel.completeLesson(userId, courseId)
+                        },
+
+                        isLessonLoading = progressState.isLoading,
+
+                        onClearAuthMessage = {
+                            userViewModel.clearMessage()
                         }
                     )
                 }

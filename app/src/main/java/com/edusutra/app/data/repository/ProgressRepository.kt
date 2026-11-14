@@ -39,4 +39,40 @@ class ProgressRepository(
 
     suspend fun completeRevision(revisionId: Int) =
         revisionDao.completeRevision(revisionId)
+
+    suspend fun completeLesson(userId: Int, courseId: Int, totalLessonsFallback: Int = 12) {
+        val existing = progressDao.getCourseProgress(userId, courseId)
+
+        if (existing == null) {
+            val totalLessons = totalLessonsFallback.coerceAtLeast(1)
+            val completed = 1.coerceAtMost(totalLessons)
+            val percentage = if (totalLessons > 0) {
+                (completed.toFloat() / totalLessons.toFloat()) * 100f
+            } else {
+                0f
+            }
+            progressDao.insertProgress(
+                Progress(
+                    userId = userId,
+                    courseId = courseId,
+                    completedLessons = completed,
+                    totalLessons = totalLessons,
+                    completionPercentage = percentage,
+                    totalStudyMinutes = 12
+                )
+            )
+        } else {
+            val totalLessons = existing.totalLessons.coerceAtLeast(1)
+            val completed = (existing.completedLessons + 1).coerceAtMost(totalLessons)
+            val percentage = (completed.toFloat() / totalLessons.toFloat()) * 100f
+            progressDao.updateProgress(
+                existing.copy(
+                    completedLessons = completed,
+                    completionPercentage = percentage,
+                    totalStudyMinutes = existing.totalStudyMinutes + 12,
+                    lastUpdated = System.currentTimeMillis()
+                )
+            )
+        }
+    }
 }

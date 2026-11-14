@@ -4,15 +4,24 @@ package com.edusutra.app.navigation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
 import com.edusutra.app.data.local.entity.User
+import com.edusutra.app.ui.screens.auth.OnboardingProfileScreen
+import com.edusutra.app.ui.screens.auth.SplashSignInScreen
+import com.edusutra.app.ui.screens.home.HomeDashboardScreen
+import com.edusutra.app.ui.screens.lesson.LessonPlayerScreen
 import com.edusutra.app.ui.screens.progress.ProgressScreen
 import com.edusutra.app.ui.screens.progress.ResultsScreen
 import com.edusutra.app.ui.screens.progress.MasteryHistoryScreen
@@ -26,10 +35,41 @@ fun AppNavigation(
     onCompleteRevision: (Int) -> Unit,
     user: User? = null,
     onSaveProfile: (User) -> Unit = {},
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    isAuthLoading: Boolean = false,
+    authMessage: String? = null,
+    isDevAuthenticated: Boolean = false,
+    isDevOnboardingComplete: Boolean = false,
+    onSignIn: (String, String) -> Unit = { _, _ -> },
+    onCreateAccount: (String, String) -> Unit = { _, _ -> },
+    onForgotPassword: (String) -> Unit = {},
+    onContinueOnboarding: (String, String, String, String, String) -> Unit = { _, _, _, _, _ -> },
+    onMarkLessonComplete: (Int, Int) -> Unit = { _, _ -> },
+    isLessonLoading: Boolean = false,
+    onClearAuthMessage: () -> Unit = {}
 ) {
 
     val navController = rememberNavController()
+    val authInfo = remember { mutableStateOf<String?>(null) }
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    LaunchedEffect(isDevAuthenticated, isDevOnboardingComplete) {
+        if (isDevAuthenticated) {
+            if (isDevOnboardingComplete) {
+                if (currentRoute != Screen.Home.route) {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            } else {
+                if (currentRoute != Screen.Onboarding.route) {
+                    navController.navigate(Screen.Onboarding.route) {
+                        popUpTo(Screen.Login.route) { inclusive = false }
+                    }
+                }
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -38,31 +78,69 @@ fun AppNavigation(
 
         // LOGIN
         composable(Screen.Login.route) {
-            PlaceholderScreen(
-                title = "Welcome to Edu Sutra",
-                description = "Your Personal Learning Path",
-                buttonText = "Get Started",
-                onClick = {
+            SplashSignInScreen(
+                isLoading = isAuthLoading,
+                errorMessage = authMessage,
+                infoMessage = authInfo.value,
+                onSignIn = { email, password ->
+                    authInfo.value = null
+                    onSignIn(email, password)
+                },
+                onCreateAccount = { email, password ->
+                    authInfo.value = null
+                    onCreateAccount(email, password)
                     navController.navigate(Screen.Onboarding.route)
+                },
+                onGoogleSignIn = {
+                    authInfo.value = "Google sign-in is not configured yet. Firebase project and OAuth credentials are required."
+                },
+                onPhoneOtp = {
+                    authInfo.value = "Phone OTP is not configured yet. Firebase Phone Authentication setup is required."
+                },
+                onForgotPassword = { email ->
+                    if (email.isBlank()) {
+                        authInfo.value = "Enter your email above first, then tap Forgot password."
+                    } else {
+                        authInfo.value = null
+                        onForgotPassword(email)
+                    }
+                },
+                onClearError = {
+                    authInfo.value = null
+                    onClearAuthMessage()
                 }
             )
         }
 
         // ONBOARDING
         composable(Screen.Onboarding.route) {
-            PlaceholderScreen(
-                title = "Welcome!",
-                description = "Start your personalised learning journey.",
-                buttonText = "Continue to Home",
-                onClick = {
-                    navController.navigate(Screen.Home.route)
+            OnboardingProfileScreen(
+                onContinue = { university, semester, goal, studyTime, language ->
+                    onContinueOnboarding(university, semester, goal, studyTime, language)
+                },
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }
 
         // DASHBOARD
         composable(Screen.Home.route) {
-            DashboardNavigationScreen(navController)
+            HomeDashboardScreen(
+                user = user,
+                progressState = progressUiState,
+                onNavigate = { route -> navController.navigate(route) },
+                onStartLesson = { navController.navigate(Screen.Lesson.route) },
+                onOpenProgress = { navController.navigate(Screen.Progress.route) },
+                onOpenProfile = { navController.navigate(Screen.Profile.route) },
+                onOpenCourses = { navController.navigate(Screen.Courses.route) },
+                courseRoute = Screen.Courses.route,
+                progressRoute = Screen.Progress.route,
+                resultsRoute = Screen.Results.route,
+                masteryHistoryRoute = Screen.MasteryHistory.route,
+                aiTutorRoute = Screen.AiTutor.route,
+                profileRoute = Screen.Profile.route
+            )
         }
 
         // COURSES
@@ -140,7 +218,20 @@ fun AppNavigation(
         }
 
         composable(Screen.Lesson.route) {
-            SimpleScreen("Lesson Player")
+            LessonPlayerScreen(
+                courseId = 1,
+                userId = 1,
+                isLoading = isLessonLoading,
+                onMarkComplete = { userId, courseId ->
+                    onMarkLessonComplete(userId, courseId)
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = false }
+                    }
+                },
+                onPrevious = { navController.popBackStack() },
+                onNext = { navController.popBackStack() },
+                onDownload = {}
+            )
         }
 
         composable(Screen.Quiz.route) {
