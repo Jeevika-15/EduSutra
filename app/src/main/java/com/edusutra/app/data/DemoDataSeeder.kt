@@ -1,12 +1,11 @@
-
 package com.edusutra.app.data
 
+import com.edusutra.app.data.local.entity.Mastery
+import com.edusutra.app.data.local.entity.Progress
+import com.edusutra.app.data.local.entity.Revision
+import com.edusutra.app.data.local.entity.User
 import com.edusutra.app.data.repository.ProgressRepository
 import com.edusutra.app.data.repository.UserRepository
-import com.edusutra.app.data.local.entity.User
-import com.edusutra.app.data.local.entity.Progress
-import com.edusutra.app.data.local.entity.Mastery
-import com.edusutra.app.data.local.entity.Revision
 import kotlinx.coroutines.flow.first
 
 object DemoDataSeeder {
@@ -53,7 +52,7 @@ object DemoDataSeeder {
                 completedLessons = 8,
                 totalLessons = 12,
                 completionPercentage = 66.7f,
-                totalStudyMinutes = 240
+                totalStudyMinutes = 240,
             )
         )
 
@@ -64,7 +63,7 @@ object DemoDataSeeder {
                 completedLessons = 5,
                 totalLessons = 10,
                 completionPercentage = 50f,
-                totalStudyMinutes = 180
+                totalStudyMinutes = 180,
             )
         )
 
@@ -77,7 +76,7 @@ object DemoDataSeeder {
                 masteryScore = 85f,
                 questionsAttempted = 20,
                 questionsCorrect = 17,
-                masteryLevel = "Advanced"
+                masteryLevel = "Advanced",
             )
         )
 
@@ -89,7 +88,7 @@ object DemoDataSeeder {
                 masteryScore = 40f,
                 questionsAttempted = 20,
                 questionsCorrect = 8,
-                masteryLevel = "Beginner"
+                masteryLevel = "Beginner",
             )
         )
 
@@ -100,7 +99,7 @@ object DemoDataSeeder {
                 courseId = 1,
                 topicName = "Object-Oriented Programming",
                 reason = "Low mastery score",
-                priority = "High"
+                priority = "High",
             )
         )
 
@@ -110,7 +109,7 @@ object DemoDataSeeder {
                 courseId = 2,
                 topicName = "Database Normalization",
                 reason = "Revision recommended",
-                priority = "Medium"
+                priority = "Medium",
             )
         )
     }

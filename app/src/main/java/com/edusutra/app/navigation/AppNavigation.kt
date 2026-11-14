@@ -1,4 +1,3 @@
-
 package com.edusutra.app.navigation
 
 import androidx.compose.foundation.layout.*
@@ -27,6 +26,7 @@ import com.edusutra.app.ui.screens.progress.ResultsScreen
 import com.edusutra.app.ui.screens.progress.MasteryHistoryScreen
 import com.edusutra.app.ui.screens.profile.ProfileScreen
 import com.edusutra.app.ui.screens.learning.AiTutorScreen
+import com.edusutra.app.ui.screens.quiz.DiagnosticScreen
 import com.edusutra.app.viewmodel.ProgressUiState
 
 @Composable
@@ -73,7 +73,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Login.route,
     ) {
 
         // LOGIN
@@ -149,17 +149,16 @@ fun AppNavigation(
                 title = "Course Catalogue",
                 description = "Explore available courses.",
                 buttonText = "View Progress",
-                onClick = {
-                    navController.navigate(Screen.Progress.route)
-                }
-            )
+            ) {
+                navController.navigate(Screen.Progress.route)
+            }
         }
 
         // PROGRESS
         composable(Screen.Progress.route) {
             ProgressScreen(
                 uiState = progressUiState,
-                onCompleteRevision = onCompleteRevision
+                onCompleteRevision = onCompleteRevision,
             )
         }
 
@@ -196,7 +195,7 @@ fun AppNavigation(
                         }
                         launchSingleTop = true
                     }
-                }
+                },
             )
         }
 
@@ -214,7 +213,11 @@ fun AppNavigation(
         }
 
         composable(Screen.Diagnostic.route) {
-            SimpleScreen("Diagnostic Assessment")
+            DiagnosticScreen(
+                onSubmit = {
+                    navController.navigate(Screen.Home.route)
+                },
+            )
         }
 
         composable(Screen.Lesson.route) {
@@ -312,14 +315,14 @@ fun PlaceholderScreen(
     title: String,
     description: String,
     buttonText: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
         Text(
@@ -348,7 +351,7 @@ fun PlaceholderScreen(
 fun SimpleScreen(title: String) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             title,

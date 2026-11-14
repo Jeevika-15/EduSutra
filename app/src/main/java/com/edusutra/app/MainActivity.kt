@@ -1,4 +1,3 @@
-
 package com.edusutra.app
 
 import android.os.Bundle
@@ -32,7 +31,7 @@ class MainActivity : ComponentActivity() {
         val progressRepository = ProgressRepository(
             database.progressDao(),
             database.masteryDao(),
-            database.revisionDao()
+            database.revisionDao(),
         )
 
         val userRepository = UserRepository(
@@ -42,7 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             EduSutraTheme {
                 Surface(
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
 
                     val progressViewModel: ProgressViewModel =
