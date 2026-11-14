@@ -1,4 +1,3 @@
-
 package com.edusutra.app.data.local
 
 import androidx.room.Database
@@ -8,6 +7,16 @@ import com.edusutra.app.data.local.entity.User
 import com.edusutra.app.data.local.entity.Progress
 import com.edusutra.app.data.local.entity.Mastery
 import com.edusutra.app.data.local.entity.Revision
+import com.edusutra.app.data.local.entity.DiagnosticQuestion
+import com.edusutra.app.data.local.entity.QuizQuestion
+import com.edusutra.app.data.local.entity.QuizAttempt
+import com.edusutra.app.data.local.entity.Course
+import com.edusutra.app.data.local.entity.Enrollment
+import com.edusutra.app.data.local.entity.LearningPath
+import com.edusutra.app.data.local.entity.LearnerProfile
+import com.edusutra.app.data.local.entity.SyllabusSubject
+import com.edusutra.app.data.local.entity.ChatMessage
+import com.edusutra.app.data.local.entity.DownloadedContent
 
 import com.edusutra.app.data.local.dao.UserDao
 import com.edusutra.app.data.local.dao.ProgressDao
@@ -19,12 +28,10 @@ import com.edusutra.app.data.local.dao.LearningPathDao
 import com.edusutra.app.data.local.dao.DiagnosticQuestionDao
 import com.edusutra.app.data.local.dao.QuizQuestionDao
 import com.edusutra.app.data.local.dao.QuizAttemptDao
-import com.edusutra.app.data.local.entity.DiagnosticQuestion
-import com.edusutra.app.data.local.entity.QuizQuestion
-import com.edusutra.app.data.local.entity.QuizAttempt
-import com.edusutra.app.data.local.entity.Course
-import com.edusutra.app.data.local.entity.Enrollment
-import com.edusutra.app.data.local.entity.LearningPath
+import com.edusutra.app.data.local.dao.LearnerProfileDao
+import com.edusutra.app.data.local.dao.SyllabusSubjectDao
+import com.edusutra.app.data.local.dao.ChatMessageDao
+import com.edusutra.app.data.local.dao.DownloadedContentDao
 
 @Database(
     entities = [
@@ -37,26 +44,32 @@ import com.edusutra.app.data.local.entity.LearningPath
         QuizAttempt::class,
         Course::class,
         Enrollment::class,
-        LearningPath::class
+        LearningPath::class,
+        LearnerProfile::class,
+        SyllabusSubject::class,
+        ChatMessage::class,
+        DownloadedContent::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
-
     abstract fun progressDao(): ProgressDao
-
     abstract fun masteryDao(): MasteryDao
-
     abstract fun revisionDao(): RevisionDao
 
     abstract fun courseDao(): CourseDao
     abstract fun enrollmentDao(): EnrollmentDao
     abstract fun learningPathDao(): LearningPathDao
+
     abstract fun diagnosticQuestionDao(): DiagnosticQuestionDao
     abstract fun quizQuestionDao(): QuizQuestionDao
     abstract fun quizAttemptDao(): QuizAttemptDao
 
+    abstract fun learnerProfileDao(): LearnerProfileDao
+    abstract fun syllabusSubjectDao(): SyllabusSubjectDao
+    abstract fun chatMessageDao(): ChatMessageDao
+    abstract fun downloadedContentDao(): DownloadedContentDao
 }

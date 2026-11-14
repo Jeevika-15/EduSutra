@@ -1,217 +1,195 @@
 package com.edusutra.app.data
 
-import com.edusutra.app.data.local.entity.Progress
-import com.edusutra.app.data.local.entity.Mastery
-import com.edusutra.app.data.local.entity.Revision
-import com.edusutra.app.data.local.entity.Course
-import com.edusutra.app.data.local.entity.LearningPath
-
-import com.edusutra.app.data.repository.ProgressRepository
-import com.edusutra.app.data.repository.CourseRepository
-import com.edusutra.app.data.repository.LearningPathRepository
-
+import com.edusutra.app.data.local.AppDatabase
+import com.edusutra.app.data.local.entity.*
 import kotlinx.coroutines.flow.first
 
 object DemoDataSeeder {
 
-    // Seed Progress, Mastery and Revision data
-    suspend fun seedIfEmpty(repository: ProgressRepository) {
-
+    suspend fun seedAllIfEmpty(database: AppDatabase) {
         val userId = 1
 
-        val existingProgress = repository.getProgress(userId).first()
-        val existingMastery = repository.getMastery(userId).first()
-        val existingRevisions = repository.getRevisions(userId).first()
-
-        if (
-            existingProgress.isNotEmpty() ||
-            existingMastery.isNotEmpty() ||
-            existingRevisions.isNotEmpty()
-        ) {
-            return
+        // 1. Seed User
+        val existingUser = database.userDao().getUserById(userId)
+        if (existingUser == null) {
+            database.userDao().insertUser(
+                User(
+                    userId = userId,
+                    fullName = "Uday Kumar Kethavath",
+                    email = "uday@k-university.edu",
+                    passwordHash = "password123",
+                    university = "JNTU University",
+                    course = "B.Tech CSE - Semester 4"
+                )
+            )
         }
 
-        // Sample course progress
-        repository.saveProgress(
-            Progress(
-                userId = userId,
-                courseId = 1,
-                completedLessons = 8,
-                totalLessons = 12,
-                completionPercentage = 66.7f,
-                totalStudyMinutes = 240
+        // 2. Seed LearnerProfile
+        val existingProfile = database.learnerProfileDao().getProfile(userId).first()
+        if (existingProfile == null) {
+            database.learnerProfileDao().insertOrUpdate(
+                LearnerProfile(
+                    userId = userId,
+                    university = "JNTU University - B.Tech CSE",
+                    semester = "Sem 4",
+                    learningGoal = "Clear weak concepts",
+                    dailyStudyTime = "2 hours",
+                    contentLanguage = "English",
+                    streakDays = 12,
+                    isPro = true,
+                    proPlanName = "Full Access",
+                    renewalDate = "12 Nov 2026"
+                )
             )
-        )
+        }
 
-        repository.saveProgress(
-            Progress(
-                userId = userId,
-                courseId = 2,
-                completedLessons = 5,
-                totalLessons = 10,
-                completionPercentage = 50f,
-                totalStudyMinutes = 180
+        // 3. Seed Courses
+        val existingCourses = database.courseDao().getAllCourses().first()
+        if (existingCourses.isEmpty()) {
+            val courses = listOf(
+                Course(
+                    courseId = 1,
+                    title = "Data Structures & Algorithms",
+                    description = "A university-level path from arrays to graphs, with prerequisites checked before each module. 7 adaptive quizzes after every topic and 3 circuit-style simulations.",
+                    category = "Computer Science",
+                    duration = "12 Weeks",
+                    difficulty = "Intermediate",
+                    instructor = "Prof. R. Mishra",
+                    imageUrl = ""
+                ),
+                Course(
+                    courseId = 2,
+                    title = "DBMS — Semester Exam Path",
+                    description = "Learn SQL, relational schema design, database normalization and transaction processing.",
+                    category = "Database",
+                    duration = "8 Weeks",
+                    difficulty = "Intermediate",
+                    instructor = "Edu Sutra Faculty",
+                    imageUrl = ""
+                ),
+                Course(
+                    courseId = 3,
+                    title = "Control Systems — Signals",
+                    description = "Explore state variables, transfer functions, stability criteria and signal flow graphs.",
+                    category = "Electronics",
+                    duration = "6 Weeks",
+                    difficulty = "Beginner",
+                    instructor = "YouTube Edu",
+                    imageUrl = ""
+                ),
+                Course(
+                    courseId = 4,
+                    title = "Artificial Intelligence",
+                    description = "Explore search algorithms, knowledge representation, neural networks and intelligent agents.",
+                    category = "Artificial Intelligence",
+                    duration = "10 Weeks",
+                    difficulty = "Advanced",
+                    instructor = "Prof. Michael Lee",
+                    imageUrl = ""
+                )
             )
-        )
+            database.courseDao().insertCourses(courses)
+        }
 
-        // Sample topic mastery
-        repository.saveMastery(
-            Mastery(
-                userId = userId,
-                courseId = 1,
-                topicName = "Introduction to Programming",
-                masteryScore = 85f,
-                questionsAttempted = 20,
-                questionsCorrect = 17,
-                masteryLevel = "Advanced"
+        // 4. Seed Enrollments
+        val existingEnrollments = database.enrollmentDao().getEnrollmentsByUser(userId).first()
+        if (existingEnrollments.isEmpty()) {
+            database.enrollmentDao().insertEnrollment(
+                Enrollment(
+                    enrollmentId = 1,
+                    userId = userId,
+                    courseId = 1,
+                    status = "Active"
+                )
             )
-        )
+        }
 
-        repository.saveMastery(
-            Mastery(
-                userId = userId,
-                courseId = 1,
-                topicName = "Object-Oriented Programming",
-                masteryScore = 40f,
-                questionsAttempted = 20,
-                questionsCorrect = 8,
-                masteryLevel = "Beginner"
-            )
-        )
-
-        // Sample revision tasks
-        repository.saveRevision(
-            Revision(
-                userId = userId,
-                courseId = 1,
-                topicName = "Object-Oriented Programming",
-                reason = "Low mastery score",
-                priority = "High"
-            )
-        )
-
-        repository.saveRevision(
-            Revision(
-                userId = userId,
-                courseId = 2,
-                topicName = "Database Normalization",
-                reason = "Revision recommended",
-                priority = "Medium"
-            )
-        )
-    }
-
-    // Seed sample courses
-    suspend fun seedCoursesIfEmpty(repository: CourseRepository) {
-
-        val existingCourses = repository.allCourses.first()
-
-        if (existingCourses.isNotEmpty()) return
-
-        val courses = listOf(
-
-            Course(
-                title = "Introduction to Programming",
-                description = "Learn programming fundamentals and problem solving.",
-                category = "Programming",
-                duration = "6 Weeks",
-                difficulty = "Beginner",
-                instructor = "John Smith"
-            ),
-
-            Course(
-                title = "Data Structures and Algorithms",
-                description = "Understand arrays, linked lists, trees and algorithms.",
-                category = "Computer Science",
-                duration = "8 Weeks",
-                difficulty = "Intermediate",
-                instructor = "David Kumar"
-            ),
-
-            Course(
-                title = "Database Management Systems",
-                description = "Learn SQL, database design and normalization.",
-                category = "Database",
-                duration = "5 Weeks",
-                difficulty = "Intermediate",
-                instructor = "Sarah Wilson"
-            ),
-
-            Course(
-                title = "Artificial Intelligence",
-                description = "Explore AI concepts and intelligent systems.",
-                category = "Artificial Intelligence",
-                duration = "7 Weeks",
-                difficulty = "Advanced",
-                instructor = "Michael Lee"
-            ),
-
-            Course(
-                title = "Web Development",
-                description = "Learn HTML, CSS and JavaScript fundamentals.",
-                category = "Web Development",
-                duration = "6 Weeks",
-                difficulty = "Beginner",
-                instructor = "Emily Brown"
-            )
-        )
-
-        repository.insertCourses(courses)
-    }
-
-    // Seed learning path steps for every course
-    suspend fun seedLearningPathIfEmpty(
-        courseRepository: CourseRepository,
-        learningPathRepository: LearningPathRepository
-    ) {
-
-        val courses = courseRepository.allCourses.first()
-        val userId = 1
-
-        for (course in courses) {
-
-            val existingSteps = learningPathRepository
-                .getLearningPath(userId, course.courseId)
-                .first()
-
-            if (existingSteps.isNotEmpty()) continue
-
+        // 5. Seed LearningPath
+        val existingSteps = database.learningPathDao().getLearningPath(userId, 1).first()
+        if (existingSteps.isEmpty()) {
             val steps = listOf(
-
                 LearningPath(
                     userId = userId,
-                    courseId = course.courseId,
-                    stepTitle = "Step 1: Introduction",
-                    description = "Understand the basics of ${course.title}.",
-                    stepOrder = 1
+                    courseId = 1,
+                    stepTitle = "1 Prerequisites",
+                    description = "Big-O basic programming, recursion basics",
+                    stepOrder = 1,
+                    isCompleted = true
                 ),
-
                 LearningPath(
                     userId = userId,
-                    courseId = course.courseId,
-                    stepTitle = "Step 2: Core Concepts",
-                    description = "Learn the important concepts and fundamentals.",
-                    stepOrder = 2
+                    courseId = 1,
+                    stepTitle = "2 Fundamentals",
+                    description = "Arrays ✓ Linked Lists ✓",
+                    stepOrder = 2,
+                    isCompleted = true
                 ),
-
                 LearningPath(
                     userId = userId,
-                    courseId = course.courseId,
-                    stepTitle = "Step 3: Practical Learning",
-                    description = "Practice what you have learned with examples.",
-                    stepOrder = 3
+                    courseId = 1,
+                    stepTitle = "3 Core Concepts",
+                    description = "• Stacks & Queues (active)\n• Trees (after module 3)\n• Graphs",
+                    stepOrder = 3,
+                    isCompleted = false
                 ),
-
                 LearningPath(
                     userId = userId,
-                    courseId = course.courseId,
-                    stepTitle = "Step 4: Final Assessment",
-                    description = "Review your knowledge and test your understanding.",
-                    stepOrder = 4
+                    courseId = 1,
+                    stepTitle = "4 Practice · Test · Revision",
+                    description = "Adaptive quiz, mock test, spaced revision days 2/5/12/30",
+                    stepOrder = 4,
+                    isCompleted = false
+                )
+            )
+            database.learningPathDao().insertSteps(steps)
+        }
+
+        // 6. Seed Progress, Mastery & Revision
+        val existingProgress = database.progressDao().getProgressByUser(userId).first()
+        if (existingProgress.isEmpty()) {
+            database.progressDao().insertProgress(
+                Progress(
+                    userId = userId,
+                    courseId = 1,
+                    completedLessons = 8,
+                    totalLessons = 12,
+                    completionPercentage = 66.7f,
+                    totalStudyMinutes = 240
                 )
             )
 
-            learningPathRepository.insertSteps(steps)
+            // Mastery List
+            val masteries = listOf(
+                Mastery(userId = userId, courseId = 1, topicName = "Arrays", masteryScore = 90f, masteryLevel = "Advanced"),
+                Mastery(userId = userId, courseId = 1, topicName = "Linked Lists", masteryScore = 85f, masteryLevel = "Advanced"),
+                Mastery(userId = userId, courseId = 1, topicName = "Stacks & Queues", masteryScore = 68f, masteryLevel = "Intermediate"),
+                Mastery(userId = userId, courseId = 1, topicName = "Graphs", masteryScore = 50f, masteryLevel = "Intermediate"),
+                Mastery(userId = userId, courseId = 1, topicName = "Recursion", masteryScore = 40f, masteryLevel = "Beginner")
+            )
+            for (m in masteries) {
+                database.masteryDao().insertMastery(m)
+            }
+
+            // Revisions
+            database.revisionDao().insertRevision(
+                Revision(userId = userId, courseId = 1, topicName = "Recursion", reason = "Low mastery score (40%)", priority = "High")
+            )
+            database.revisionDao().insertRevision(
+                Revision(userId = userId, courseId = 1, topicName = "Database Normalization", reason = "Spaced revision recommended", priority = "Medium")
+            )
+        }
+
+        // 7. Seed Syllabus Subjects
+        val existingSubjects = database.syllabusSubjectDao().getSubjects(userId).first()
+        if (existingSubjects.isEmpty()) {
+            val subjects = listOf(
+                SyllabusSubject(userId = userId, semester = "Sem 4", subjectName = "Data Structures", status = "PATH READY", isIncluded = true),
+                SyllabusSubject(userId = userId, semester = "Sem 4", subjectName = "Database Management", status = "PATH READY", isIncluded = true),
+                SyllabusSubject(userId = userId, semester = "Sem 4", subjectName = "Computer Networks", status = "PARSING", isIncluded = true),
+                SyllabusSubject(userId = userId, semester = "Sem 4", subjectName = "Operating Systems", status = "PENDING", isIncluded = false),
+                SyllabusSubject(userId = userId, semester = "Sem 4", subjectName = "Discrete Mathematics", status = "PENDING", isIncluded = false)
+            )
+            database.syllabusSubjectDao().insertSubjects(subjects)
         }
     }
 }

@@ -1,349 +1,291 @@
 package com.edusutra.app.ui.screens.progress
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.edusutra.app.ui.components.BadgeTag
+import com.edusutra.app.ui.components.EduStatBox
+import com.edusutra.app.ui.components.EduSutraTopBar
+import com.edusutra.app.ui.theme.*
 import com.edusutra.app.viewmodel.ProgressUiState
-
-private val EduBlue = Color(0xFF52669A)
 
 @Composable
 fun ProgressScreen(
     uiState: ProgressUiState,
-    onCompleteRevision: (Int) -> Unit,
+    onCompleteRevision: (Int) -> Unit
 ) {
+    val totalConcepts = 12
+    val masteredCount = uiState.masteryList.count { it.masteryScore >= 75f }.coerceAtLeast(7)
+    val weakCount = uiState.masteryList.count { it.masteryScore < 50f }.coerceAtLeast(3)
+    val revisionDueCount = uiState.revisionList.count { !it.isCompleted }.coerceAtLeast(2)
 
-    val totalCompleted = uiState.progressList.sumOf {
-        it.completedLessons
-    }
-
-    val totalLessons = uiState.progressList.sumOf {
-        it.totalLessons
-    }
-
-    val overallProgress = if (totalLessons > 0) {
-        (totalCompleted.toFloat() / totalLessons).coerceIn(0f, 1f)
-    } else {
-        0f
-    }
-
-    val studyMinutes = uiState.progressList.sumOf {
-        it.totalStudyMinutes
-    }
-
-    val weakTopics = uiState.masteryList.filter {
-        it.masteryScore < 50f
-    }
-
-    val pendingRevisions = uiState.revisionList.filter {
-        !it.isCompleted
-    }
-
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+            .background(SlateBackground)
     ) {
+        EduSutraTopBar(
+            title = "Mastery dashboard",
+            subtitle = "Spaced + works offline",
+            badgeText = "Day 2/5/12/30",
+            actionText = "Export",
+            onActionClick = {}
+        )
 
-        item {
-            Column {
-                Text(
-                    text = "My Learning Progress",
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-
-                Text(
-                    text = "Track your learning journey with Edu Sutra.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-
-        item {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = EduBlue
-                ),
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Overall Completion",
-                        color = Color.White
-                    )
-
-                    Text(
-                        text = "${(overallProgress * 100).toInt()}%",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = Color.White
-                    )
-
-                    LinearProgressIndicator(
-                        progress = { overallProgress },
-                        modifier = Modifier.fillMaxWidth(),
-                        color = Color.White,
-                        trackColor = Color.White.copy(alpha = 0.3f)
-                    )
-
-                    Text(
-                        text = "$totalCompleted of $totalLessons lessons completed",
-                        color = Color.White
-                    )
-                }
-            }
-        }
-
-        item {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Dropdown / Scope Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                StatisticCard(
-                    title = "Study Time",
-                    value = "${studyMinutes / 60} hrs",
+                Text(
+                    text = "PROGRESS · DATA STRUCTURES",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryBlue
+                )
+                BadgeTag("This week", SlateBorderSubtle, Navy800)
+            }
+
+            // Top 3 Stat Cards (Mastered / Weak / Revision Due)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                EduStatBox(
+                    title = "MASTERED",
+                    value = "$masteredCount/$totalConcepts",
+                    highlightColor = SuccessGreen,
                     modifier = Modifier.weight(1f)
                 )
 
-                StatisticCard(
-                    title = "Completed Lessons",
-                    value = "$totalCompleted",
-                    modifier = Modifier.weight(1f),
+                EduStatBox(
+                    title = "WEAK",
+                    value = "$weakCount",
+                    highlightColor = ErrorRed,
+                    modifier = Modifier.weight(1f)
+                )
+
+                EduStatBox(
+                    title = "REVISION DUE",
+                    value = "$revisionDueCount",
+                    highlightColor = WarningAmber,
+                    modifier = Modifier.weight(1f)
                 )
             }
-        }
 
-        item {
-            SectionTitle("Course Progress")
-        }
+            // Concept Mastery List Section
+            Text(
+                text = "CONCEPT MASTERY",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Navy700
+            )
 
-        if (uiState.progressList.isEmpty()) {
-            item {
-                EmptyMessage("No course progress recorded yet.")
-            }
-        } else {
-            items(uiState.progressList) { progress ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+            val topics = listOf(
+                Pair("Arrays", "MASTERED"),
+                Pair("Linked Lists", "MASTERED"),
+                Pair("Stacks & Queues", "LEARNING 68%"),
+                Pair("Recursion", "WEAK 40%"),
+                Pair("Graphs", "WEAK 50%")
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder)
+            ) {
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = "Course #${progress.courseId}",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Text(
-                            text = "${progress.completedLessons} / ${progress.totalLessons} lessons"
-                        )
-
-                        val fraction = if (progress.totalLessons > 0) {
-                            (progress.completedLessons.toFloat() /
-                                    progress.totalLessons).coerceIn(0f, 1f)
-                        } else {
-                            0f
-                        }
-
-                        LinearProgressIndicator(
-                            progress = { fraction },
-                            modifier = Modifier.fillMaxWidth(),
-                            color = EduBlue
-                        )
-
-                        Text(
-                            text = "${(fraction * 100).toInt()}% completed",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-        }
-
-        item {
-            SectionTitle("Topic Mastery")
-        }
-
-        if (uiState.masteryList.isEmpty()) {
-            item {
-                EmptyMessage("No topic mastery records available.")
-            }
-        } else {
-            items(uiState.masteryList) { mastery ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    topics.forEach { (name, status) ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = mastery.topicName,
-                                style = MaterialTheme.typography.titleMedium
+                                text = name,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Navy900
                             )
 
-                            Text("${mastery.masteryScore.toInt()}%")
+                            when {
+                                status.startsWith("MASTERED") -> BadgeTag("MASTERED", SuccessGreenSoft, SuccessGreen)
+                                status.startsWith("LEARNING") -> BadgeTag(status, BlueBadge, PrimaryBlue)
+                                else -> BadgeTag(status, ErrorRedSoft, ErrorRed)
+                            }
                         }
-
-                        val score = (mastery.masteryScore / 100f)
-                            .coerceIn(0f, 1f)
-
-                        LinearProgressIndicator(
-                            progress = { score },
-                            modifier = Modifier.fillMaxWidth(),
-                            color = EduBlue
-                        )
-
-                        Text(
-                            text = mastery.masteryLevel,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
             }
-        }
 
-        item {
-            SectionTitle("Topics to Improve")
-        }
-
-        if (weakTopics.isEmpty()) {
-            item {
-                EmptyMessage("No weak topics identified yet.")
-            }
-        } else {
-            items(weakTopics) { topic ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = topic.topicName,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Text("Mastery score: ${topic.masteryScore.toInt()}%")
-                    }
-                }
-            }
-        }
-
-        item {
-            SectionTitle("Revision Tasks")
-        }
-
-        if (pendingRevisions.isEmpty()) {
-            item {
-                EmptyMessage("You're all caught up! No pending revisions.")
-            }
-        } else {
-            items(pendingRevisions) { revision ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
+            // Spaced Revision Schedule Section
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(12.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Checkbox(
-                            checked = revision.isCompleted,
-                            onCheckedChange = {
-                                onCompleteRevision(revision.revisionId)
-                            }
-                        )
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = revision.topicName,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-
-                            Text(
-                                text = revision.reason,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
                         Text(
-                            text = revision.priority,
-                            style = MaterialTheme.typography.labelMedium
+                            text = "SPACED REVISION SCHEDULE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SlateMuted
                         )
+                        Text(
+                            text = "2 due today",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = WarningAmber
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("Day 1 ✓", "Day 2 due", "Day 5", "Day 12", "Day 30").forEach { day ->
+                            val isDue = day.contains("due")
+                            val isDone = day.contains("✓")
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = when {
+                                    isDue -> WarningAmberSoft
+                                    isDone -> SuccessGreenSoft
+                                    else -> SlateBorderSubtle
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .border(
+                                        1.dp,
+                                        when {
+                                            isDue -> WarningAmber
+                                            isDone -> SuccessGreen
+                                            else -> SlateBorder
+                                        },
+                                        RoundedCornerShape(8.dp)
+                                    )
+                            ) {
+                                Text(
+                                    text = day,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = when {
+                                        isDue -> WarningAmber
+                                        isDone -> SuccessGreen
+                                        else -> Navy700
+                                    },
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
+
+            // Activity - Last 7 Days (Bar Chart)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "ACTIVITY — LAST 7 DAYS",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SlateMuted
+                        )
+                        Text(
+                            text = "Streak: 12 days",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = WarningAmber
+                        )
+                    }
+
+                    // Bar Chart
+                    val weekData = listOf(
+                        "M" to 0.4f,
+                        "T" to 0.65f,
+                        "W" to 0.5f,
+                        "T" to 0.95f,
+                        "F" to 0.7f,
+                        "S" to 0.85f,
+                        "S" to 0.45f
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(80.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        weekData.forEach { (day, heightRatio) ->
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Bottom,
+                                modifier = Modifier.fillMaxHeight()
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = PrimaryBlue,
+                                    modifier = Modifier
+                                        .width(18.dp)
+                                        .fillMaxHeight(heightRatio)
+                                ) {}
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(day, fontSize = 11.sp, color = SlateMuted)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
         }
-
-        item {
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-    }
-}
-
-@Composable
-private fun StatisticCard(
-    title: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(title, style = MaterialTheme.typography.bodyMedium)
-
-            Text(
-                value,
-                style = MaterialTheme.typography.headlineSmall,
-                color = EduBlue
-            )
-        }
-    }
-}
-
-@Composable
-private fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge
-    )
-}
-
-@Composable
-private fun EmptyMessage(message: String) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = message,
-            modifier = Modifier.padding(16.dp),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
